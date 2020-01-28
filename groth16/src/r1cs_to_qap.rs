@@ -1,3 +1,4 @@
+use crate::Vec;
 use algebra::PairingEngine;
 use ff_fft::EvaluationDomain;
 
@@ -6,7 +7,7 @@ use algebra::{One, Zero};
 use r1cs_core::{Index, SynthesisError};
 
 use rayon::prelude::*;
-use std::ops::{AddAssign, SubAssign};
+use core::ops::{AddAssign, SubAssign};
 
 pub(crate) struct R1CStoQAP;
 

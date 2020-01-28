@@ -1,5 +1,6 @@
 //! An implementation of the [Groth][Groth16] zkSNARK.
 //! [Groth16]: https://eprint.iacr.org/2016/260.pdf
+#![cfg_attr(not(feature = "std"), no_std)]
 #![deny(unused_import_braces, unused_qualifications, trivial_casts)]
 #![deny(trivial_numeric_casts, private_in_public, variant_size_differences)]
 #![deny(stable_features, unreachable_pub, non_shorthand_field_patterns)]
@@ -8,20 +9,34 @@
 #![deny(unused_comparisons, bare_trait_objects, unused_must_use, const_err)]
 #![forbid(unsafe_code)]
 
-#[macro_use]
+#[cfg_attr(feature = "prover", macro_use)]
 extern crate bench_utils;
+
+
+#[cfg(not(feature = "std"))]
+#[cfg_attr(feature = "prover", macro_use)]
+extern crate alloc;
+
+#[cfg(not(feature = "std"))]
+pub(crate) use alloc::vec::Vec;
+
+#[cfg(feature = "std")]
+pub(crate) use std::vec::Vec;
 
 use algebra::{bytes::ToBytes, PairingCurve, PairingEngine};
 use r1cs_core::SynthesisError;
-use std::io::{self, Read, Result as IoResult, Write};
+use algebra::fake_io::{Read, Result as IoResult, Write};
 
 /// Reduce an R1CS instance to a *Quadratic Arithmetic Program* instance.
+#[cfg(feature = "prover")]
 pub mod r1cs_to_qap;
 
 /// Generate public parameters for the Groth16 zkSNARK construction.
+#[cfg(feature = "prover")]
 pub mod generator;
 
 /// Create proofs for the Groth16 zkSNARK construction.
+#[cfg(feature = "prover")]
 pub mod prover;
 
 /// Verify proofs for the Groth16 zkSNARK construction.
@@ -30,7 +45,13 @@ pub mod verifier;
 #[cfg(test)]
 mod test;
 
-pub use self::{generator::*, prover::*, verifier::*};
+pub use self::verifier::*;
+
+#[cfg(feature = "prover")]
+pub use self::{
+    generator::*,
+    prover::*,
+};
 
 /// A proof in the Groth16 SNARK.
 #[derive(Clone)]
@@ -42,7 +63,7 @@ pub struct Proof<E: PairingEngine> {
 
 impl<E: PairingEngine> ToBytes for Proof<E> {
     #[inline]
-    fn write<W: Write>(&self, mut writer: W) -> io::Result<()> {
+    fn write<W: Write>(&self, mut writer: W) -> IoResult<()> {
         self.a.write(&mut writer)?;
         self.b.write(&mut writer)?;
         self.c.write(&mut writer)
@@ -68,13 +89,13 @@ impl<E: PairingEngine> Default for Proof<E> {
 impl<E: PairingEngine> Proof<E> {
     /// Serialize the proof into bytes, for storage on disk or transmission
     /// over the network.
-    pub fn write<W: Write>(&self, mut _writer: W) -> io::Result<()> {
+    pub fn write<W: Write>(&self, mut _writer: W) -> IoResult<()> {
         // TODO: implement serialization
         unimplemented!()
     }
 
     /// Deserialize the proof from bytes.
-    pub fn read<R: Read>(mut _reader: R) -> io::Result<Self> {
+    pub fn read<R: Read>(mut _reader: R) -> IoResult<Self> {
         // TODO: implement serialization
         unimplemented!()
     }
@@ -128,13 +149,13 @@ impl<E: PairingEngine> PartialEq for VerifyingKey<E> {
 impl<E: PairingEngine> VerifyingKey<E> {
     /// Serialize the verification key into bytes, for storage on disk
     /// or transmission over the network.
-    pub fn write<W: Write>(&self, mut _writer: W) -> io::Result<()> {
+    pub fn write<W: Write>(&self, mut _writer: W) -> IoResult<()> {
         // TODO: implement serialization
         unimplemented!()
     }
 
     /// Deserialize the verification key from bytes.
-    pub fn read<R: Read>(mut _reader: R) -> io::Result<Self> {
+    pub fn read<R: Read>(mut _reader: R) -> IoResult<Self> {
         // TODO: implement serialization
         unimplemented!()
     }
@@ -174,13 +195,13 @@ impl<E: PairingEngine> PartialEq for Parameters<E> {
 
 impl<E: PairingEngine> Parameters<E> {
     /// Serialize the parameters to bytes.
-    pub fn write<W: Write>(&self, mut _writer: W) -> io::Result<()> {
+    pub fn write<W: Write>(&self, mut _writer: W) -> IoResult<()> {
         // TODO: implement serialization
         unimplemented!()
     }
 
     /// Deserialize the public parameters from bytes.
-    pub fn read<R: Read>(mut _reader: R, _checked: bool) -> io::Result<Self> {
+    pub fn read<R: Read>(mut _reader: R, _checked: bool) -> IoResult<Self> {
         // TODO: implement serialization
         unimplemented!()
     }

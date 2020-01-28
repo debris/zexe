@@ -28,7 +28,7 @@ ff-fft = { path = "../ff-fft" }
 r1cs-core = { path = "../r1cs-core" }
 bench-utils = { path = "../bench-utils" }
 
-rand = { version = "0.7" }
+rand = { version = "0.7", default-features = false }
 rayon = { version = "1" }
 smallvec = { version = "0.6" }
 
@@ -36,6 +36,8 @@ smallvec = { version = "0.6" }
 csv = { version = "1" }
 
 [features]
+prover = []
+std = ["algebra/std", "ff-fft/std", "r1cs-core/std"]
 print-trace = [ "bench-utils/print-trace" ]
 
 [[example]]

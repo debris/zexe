@@ -1,3 +1,4 @@
+use crate::{Vec, String};
 use algebra::{
     groups::Group, msm::FixedBaseMSM, Field, PairingEngine, PrimeField, ProjectiveCurve,
     UniformRand,

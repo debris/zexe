@@ -42,7 +42,7 @@ mod bls12_377 {
 
     use algebra::{curves::bls12_377::Bls12_377, fields::bls12_377::Fr, UniformRand};
     use rand::thread_rng;
-    use std::ops::MulAssign;
+    use core::ops::MulAssign;
 
     #[test]
     fn prove_and_verify() {
