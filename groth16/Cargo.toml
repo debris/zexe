@@ -36,7 +36,7 @@ smallvec = "1.1.0"
 csv = { version = "1" }
 
 [features]
-prover = []
+prover = ["std"]
 std = ["algebra/std", "ff-fft/std", "r1cs-core/std"]
 print-trace = [ "bench-utils/print-trace" ]
 

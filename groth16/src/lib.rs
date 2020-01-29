@@ -18,14 +18,16 @@ extern crate bench_utils;
 extern crate alloc;
 
 #[cfg(not(feature = "std"))]
-pub(crate) use alloc::vec::Vec;
+#[allow(unused_imports)]
+pub(crate) use alloc::{vec::Vec, string::String};
 
 #[cfg(feature = "std")]
-pub(crate) use std::vec::Vec;
+#[allow(unused_imports)]
+pub(crate) use std::{vec::Vec, string::String};
 
 use algebra::{bytes::ToBytes, PairingCurve, PairingEngine};
 use r1cs_core::SynthesisError;
-use algebra::fake_io::{Read, Result as IoResult, Write};
+use algebra::io::{Read, Result as IoResult, Write};
 
 /// Reduce an R1CS instance to a *Quadratic Arithmetic Program* instance.
 #[cfg(feature = "prover")]
