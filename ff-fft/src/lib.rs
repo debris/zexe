@@ -1,5 +1,5 @@
-//! This crate implements functions for manipulating polynomials over finite fields,
-//! including FFTs.
+//! This crate implements functions for manipulating polynomials over finite
+//! fields, including FFTs.
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(unused_import_braces, trivial_casts, bare_trait_objects, missing_docs)]
 #![deny(unused_qualifications, variant_size_differences, stable_features)]
@@ -10,13 +10,14 @@
 #![forbid(unsafe_code)]
 
 #[cfg(not(feature = "std"))]
+#[macro_use]
 extern crate alloc;
 
 #[cfg(not(feature = "std"))]
-pub(crate) use alloc::{vec, vec::Vec, borrow::Cow, collections::BTreeMap};
+pub(crate) use alloc::{borrow::Cow, collections::BTreeMap, vec::Vec};
 
 #[cfg(feature = "std")]
-pub(crate) use std::{vec, vec::Vec, borrow::Cow, collections::BTreeMap};
+pub(crate) use std::{borrow::Cow, collections::BTreeMap, vec::Vec};
 
 pub mod domain;
 pub mod evaluations;
@@ -26,7 +27,7 @@ pub(crate) mod multicore;
 
 pub use domain::EvaluationDomain;
 pub use evaluations::Evaluations;
-pub use polynomial::{DensePolynomial, SparsePolynomial, DenseOrSparsePolynomial};
+pub use polynomial::{DenseOrSparsePolynomial, DensePolynomial, SparsePolynomial};
 
 #[cfg(test)]
 mod test;

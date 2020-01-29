@@ -1,18 +1,17 @@
-use num_traits::{One, Zero};
 use core::{
     cmp::{Ord, Ordering, PartialOrd},
     fmt::{Display, Formatter, Result as FmtResult},
-    //io::{Read, Result as IoResult, Write},
     marker::PhantomData,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
     str::FromStr,
 };
+use num_traits::{One, Zero};
 
-use crate::fake_io::{Read, Result as IoResult, Write};
 use crate::{
     biginteger::{arithmetic as fa, BigInteger as _BigInteger, BigInteger256 as BigInteger},
     bytes::{FromBytes, ToBytes},
     fields::{Field, FpParameters, LegendreSymbol, PrimeField, SquareRootField},
+    io::{Read, Result as IoResult, Write},
 };
 
 pub trait Fp256Parameters: FpParameters<BigInt = BigInteger> {}

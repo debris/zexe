@@ -235,7 +235,9 @@ pub fn from_str_test<F: PrimeField>() {
         for _ in 0..ITERATIONS {
             let n: u64 = rng.gen();
 
-            let a = F::from_str(&crate::alloc::format!("{}", n)).map_err(|_| ()).unwrap();
+            let a = F::from_str(&crate::format!("{}", n))
+                .map_err(|_| ())
+                .unwrap();
             let b = F::from_repr(n.into());
 
             assert_eq!(a, b);
@@ -358,7 +360,7 @@ pub fn field_serialization_test<F: Field>(buf_size: usize) {
     for _ in 0..ITERATIONS {
         let a = F::rand(&mut rng);
         {
-            let mut serialized = crate::alloc::vec![0; buf_size];
+            let mut serialized = vec![0; buf_size];
             a.serialize(&[], &mut serialized).unwrap();
 
             let mut extra_info_buf = [false; 0];
@@ -367,7 +369,7 @@ pub fn field_serialization_test<F: Field>(buf_size: usize) {
         }
 
         {
-            let mut serialized = crate::alloc::vec![0; buf_size];
+            let mut serialized = vec![0; buf_size];
             a.serialize(&[true; 2], &mut serialized).unwrap();
             let mut extra_info_buf = [false; 2];
             let b = F::deserialize(&serialized, &mut extra_info_buf).unwrap();
@@ -377,38 +379,42 @@ pub fn field_serialization_test<F: Field>(buf_size: usize) {
 
         use crate::serialize::SerializationError;
         {
-            let mut serialized = crate::alloc::vec![0; buf_size];
-            assert!(
-                if let SerializationError::NotEnoughSpace =
-                a.serialize(&[true; 200], &mut serialized).unwrap_err() {
-                    true
-                } else { false }
-            );
+            let mut serialized = vec![0; buf_size];
+            assert!(if let SerializationError::NotEnoughSpace =
+                a.serialize(&[true; 200], &mut serialized).unwrap_err()
+            {
+                true
+            } else {
+                false
+            });
             let mut extra_info_buf = [false; 200];
-            assert!(
-                if let SerializationError::NotEnoughSpace =
-                F::deserialize(&serialized, &mut extra_info_buf).unwrap_err() {
-                    true
-                } else { false }
-            );
+            assert!(if let SerializationError::NotEnoughSpace =
+                F::deserialize(&serialized, &mut extra_info_buf).unwrap_err()
+            {
+                true
+            } else {
+                false
+            });
         }
 
         {
-            let mut serialized = crate::alloc::vec![0; buf_size+1];
-            assert!(
-                if let SerializationError::BufferWrongSize =
-                a.serialize(&[true; 2], &mut serialized).unwrap_err() {
-                    true
-                } else { false }
-            );
+            let mut serialized = vec![0; buf_size + 1];
+            assert!(if let SerializationError::BufferWrongSize =
+                a.serialize(&[true; 2], &mut serialized).unwrap_err()
+            {
+                true
+            } else {
+                false
+            });
 
             let mut extra_info_buf = [false; 2];
-            assert!(
-                if let SerializationError::BufferWrongSize =
-                F::deserialize(&serialized, &mut extra_info_buf).unwrap_err() {
-                    true
-                } else { false }
-            );
+            assert!(if let SerializationError::BufferWrongSize =
+                F::deserialize(&serialized, &mut extra_info_buf).unwrap_err()
+            {
+                true
+            } else {
+                false
+            });
         }
     }
 }

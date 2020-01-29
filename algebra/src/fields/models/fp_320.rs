@@ -1,18 +1,17 @@
-use num_traits::{One, Zero};
 use core::{
     cmp::{Ord, Ordering, PartialOrd},
     fmt::{Display, Formatter, Result as FmtResult},
-    //io::{Read, Result as IoResult, Write},
     marker::PhantomData,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
     str::FromStr,
 };
+use num_traits::{One, Zero};
 
-use crate::fake_io::{Read, Result as IoResult, Write};
 use crate::{
     biginteger::{arithmetic as fa, BigInteger as _BigInteger, BigInteger320 as BigInteger},
     bytes::{FromBytes, ToBytes},
     fields::{Field, FpParameters, LegendreSymbol, PrimeField, SquareRootField},
+    io::{Read, Result as IoResult, Write},
 };
 
 pub trait Fp320Parameters: FpParameters<BigInt = BigInteger> {}
@@ -42,8 +41,6 @@ impl<P> Fp320<P> {
 }
 
 impl<P: Fp320Parameters> Fp320<P> {
-    
-
     #[inline]
     fn is_valid(&self) -> bool {
         self.0 < P::MODULUS
@@ -432,7 +429,6 @@ impl<P: Fp320Parameters> FromStr for Fp320<P> {
     /// Does not accept unnecessary leading zeroes or a blank string.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            println!("Is empty!");
             return Err(());
         }
 
@@ -463,7 +459,6 @@ impl<P: Fp320Parameters> FromStr for Fp320<P> {
                     )));
                 },
                 None => {
-                    println!("Not valid digit!");
                     return Err(());
                 },
             }

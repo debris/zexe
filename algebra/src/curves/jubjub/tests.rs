@@ -1,24 +1,34 @@
-use crate::{bytes::{FromBytes, ToBytes}, curves::{
-    jubjub::*, models::twisted_edwards_extended::tests::montgomery_conversion_test,
-    tests::curve_tests, AffineCurve, ProjectiveCurve,
-}, fields::{PrimeField, jubjub::{fq::Fq, fr::Fr}}, groups::tests::group_test, buffer_bit_byte_size};
-use num_traits::Zero;
-use rand;
+use crate::{
+    bytes::{FromBytes, ToBytes},
+    curves::{
+        jubjub::*,
+        models::twisted_edwards_extended::{
+            tests::{edwards_curve_serialization_test, montgomery_conversion_test},
+            GroupAffine,
+        },
+        tests::curve_tests,
+        AffineCurve, ProjectiveCurve,
+    },
+    fields::jubjub::fr::Fr,
+    groups::tests::group_test,
+    CanonicalSerialize,
+};
 use core::str::FromStr;
-use crate::curves::models::twisted_edwards_extended::tests::edwards_curve_serialization_test;
+use num_traits::Zero;
+use rand::{rngs::OsRng, Rng};
 
 #[test]
 fn test_projective_curve() {
     curve_tests::<JubJubProjective>();
 
-    let (_, byte_size) = buffer_bit_byte_size(Fq::size_in_bits());
+    let byte_size = <GroupAffine<JubJubParameters> as CanonicalSerialize>::buffer_size();
     edwards_curve_serialization_test::<JubJubParameters>(byte_size);
 }
 
 #[test]
 fn test_projective_group() {
-    let a = rand::random();
-    let b = rand::random();
+    let a = OsRng.gen();
+    let b = OsRng.gen();
     for _i in 0..100 {
         group_test::<JubJubProjective>(a, b);
     }
@@ -26,8 +36,8 @@ fn test_projective_group() {
 
 #[test]
 fn test_affine_group() {
-    let a: JubJubAffine = rand::random();
-    let b: JubJubAffine = rand::random();
+    let a: JubJubAffine = OsRng.gen();
+    let b: JubJubAffine = OsRng.gen();
     for _i in 0..100 {
         group_test::<JubJubAffine>(a, b);
     }
@@ -42,8 +52,8 @@ fn test_generator() {
 
 #[test]
 fn test_conversion() {
-    let a: JubJubAffine = rand::random();
-    let b: JubJubAffine = rand::random();
+    let a: JubJubAffine = OsRng.gen();
+    let b: JubJubAffine = OsRng.gen();
     let a_b = {
         use crate::groups::Group;
         (a + &b).double().double()

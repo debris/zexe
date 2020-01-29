@@ -1,5 +1,8 @@
-use crate::Vec;
-use crate::fake_io::{Read, Result as IoResult, Write, Error as IoError};
+use crate::{
+    error,
+    io::{Read, Result as IoResult, Write},
+    Vec,
+};
 
 pub trait ToBytes {
     /// Serializes `self` into `writer`.
@@ -140,7 +143,7 @@ array_bytes!(32);
 #[macro_export]
 macro_rules! to_bytes {
     ($($x:expr),*) => ({
-        let mut buf = $crate::alloc::vec![];
+        let mut buf = $crate::vec![];
         {$crate::push_to_vec!(buf, $($x),*)}.map(|_| buf)
     });
 }
@@ -249,7 +252,7 @@ impl FromBytes for bool {
         match u8::read(reader) {
             Ok(0) => Ok(false),
             Ok(1) => Ok(true),
-            Ok(_) => Err(IoError),
+            Ok(_) => Err(error("FromBytes::read failed")),
             Err(err) => Err(err),
         }
     }
@@ -282,19 +285,10 @@ impl<'a, T: 'a + ToBytes> ToBytes for &'a T {
     }
 }
 
-//impl FromBytes for Vec<u8> {
-    //#[inline]
-    //fn read<R: Read>(mut reader: R) -> IoResult<Self> {
-        //let mut buf = Vec::new();
-        //let _ = reader.read_to_end(&mut buf)?;
-        //Ok(buf)
-    //}
-//}
-
 #[cfg(test)]
 mod test {
-    use crate::alloc::{vec, vec::Vec};
     use super::ToBytes;
+    use crate::Vec;
     #[test]
     fn test_macro_empty() {
         let array: Vec<u8> = vec![];

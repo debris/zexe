@@ -1,11 +1,10 @@
-use crate::BitIterator;
-use crate::UniformRand;
-use num_traits::Zero;
+use crate::{BitIterator, UniformRand};
 use core::{
     fmt::{Debug, Display},
     hash::Hash,
     ops::{Add, AddAssign, Neg, Sub, SubAssign},
 };
+use num_traits::Zero;
 
 use crate::{
     bytes::{FromBytes, ToBytes},

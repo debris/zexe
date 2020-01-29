@@ -1,18 +1,17 @@
-use num_traits::{One, Zero};
 use core::{
     cmp::{Ord, Ordering, PartialOrd},
     fmt::{Display, Formatter, Result as FmtResult},
-    //io::{Read, Result as IoResult, Write},
     marker::PhantomData,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
     str::FromStr,
 };
+use num_traits::{One, Zero};
 
-use crate::fake_io::{Read, Result as IoResult, Write};
 use crate::{
     biginteger::{arithmetic as fa, BigInteger as _BigInteger, BigInteger768 as BigInteger},
     bytes::{FromBytes, ToBytes},
     fields::{Field, FpParameters, LegendreSymbol, PrimeField, SquareRootField},
+    io::{Read, Result as IoResult, Write},
 };
 
 pub trait Fp768Parameters: FpParameters<BigInt = BigInteger> {}
@@ -34,7 +33,6 @@ pub struct Fp768<P>(
     pub PhantomData<P>,
 );
 
-
 impl<P> Fp768<P> {
     #[inline]
     pub const fn new(element: BigInteger) -> Self {
@@ -43,7 +41,6 @@ impl<P> Fp768<P> {
 }
 
 impl<P: Fp768Parameters> Fp768<P> {
-
     #[inline]
     pub(crate) fn is_valid(&self) -> bool {
         self.0 < P::MODULUS
@@ -794,7 +791,6 @@ impl<P: Fp768Parameters> FromStr for Fp768<P> {
     /// Does not accept unnecessary leading zeroes or a blank string.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            println!("Is empty!");
             return Err(());
         }
 
@@ -825,7 +821,6 @@ impl<P: Fp768Parameters> FromStr for Fp768<P> {
                     )));
                 },
                 None => {
-                    println!("Not valid digit!");
                     return Err(());
                 },
             }

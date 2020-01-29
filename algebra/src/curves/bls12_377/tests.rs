@@ -1,31 +1,37 @@
 #![allow(unused_imports)]
-use crate::{curves::{
-    bls12_377::{
-        g1::Bls12_377G1Parameters, g2::Bls12_377G2Parameters, Bls12_377, G1Affine, G1Projective, G2Affine, G2Projective,
+use crate::{
+    curves::{
+        bls12_377::{
+            g1::Bls12_377G1Parameters, g2::Bls12_377G2Parameters, Bls12_377, G1Affine,
+            G1Projective, G2Affine, G2Projective,
+        },
+        models::{short_weierstrass_jacobian::GroupAffine, SWModelParameters},
+        tests::{curve_tests, sw_curve_serialization_test},
+        AffineCurve, PairingEngine, ProjectiveCurve,
     },
-    models::SWModelParameters,
-    tests::curve_tests,
-    AffineCurve, PairingEngine, ProjectiveCurve,
-}, fields::{
-    bls12_377::{Fq, Fq12, Fq2, Fr},
-    Field, FpParameters, PrimeField, SquareRootField,
-}, groups::tests::group_test, buffer_bit_byte_size};
-use num_traits::{One, Zero};
+    fields::{
+        bls12_377::{Fq, Fq12, Fq2, Fr},
+        Field, FpParameters, SquareRootField,
+    },
+    groups::tests::group_test,
+    CanonicalSerialize,
+};
 use core::ops::{AddAssign, MulAssign};
-use crate::curves::tests::sw_curve_serialization_test;
+use num_traits::{One, Zero};
+use rand::{rngs::OsRng, Rng};
 
 #[test]
 fn test_g1_projective_curve() {
     curve_tests::<G1Projective>();
 
-    let (_, byte_size) = buffer_bit_byte_size(Fq::size_in_bits());
+    let byte_size = <GroupAffine<Bls12_377G1Parameters> as CanonicalSerialize>::buffer_size();
     sw_curve_serialization_test::<Bls12_377G1Parameters>(byte_size);
 }
 
 #[test]
 fn test_g1_projective_group() {
-    let a: G1Projective = rand::random();
-    let b: G1Projective = rand::random();
+    let a: G1Projective = OsRng.gen();
+    let b: G1Projective = OsRng.gen();
     group_test(a, b);
 }
 
@@ -40,14 +46,14 @@ fn test_g1_generator() {
 fn test_g2_projective_curve() {
     curve_tests::<G2Projective>();
 
-    let (_, byte_size) = buffer_bit_byte_size(Fq::size_in_bits());
-    sw_curve_serialization_test::<Bls12_377G2Parameters>(2*byte_size);
+    let byte_size = <GroupAffine<Bls12_377G2Parameters> as CanonicalSerialize>::buffer_size();
+    sw_curve_serialization_test::<Bls12_377G2Parameters>(byte_size);
 }
 
 #[test]
 fn test_g2_projective_group() {
-    let a: G2Projective = rand::random();
-    let b: G2Projective = rand::random();
+    let a: G2Projective = OsRng.gen();
+    let b: G2Projective = OsRng.gen();
     group_test(a, b);
 }
 
@@ -60,9 +66,9 @@ fn test_g2_generator() {
 
 //    #[test]
 //    fn test_bilinearity() {
-//        let a: G1Projective = rand::random();
-//        let b: G2Projective = rand::random();
-//        let s: Fr = rand::random();
+//        let a: G1Projective = OsRng.gen();
+//        let b: G2Projective = OsRng.gen();
+//        let s: Fr = OsRng.gen();
 //
 //        let sa = a * &s;
 //        let sb = b * &s;

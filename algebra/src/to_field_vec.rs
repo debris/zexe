@@ -1,5 +1,3 @@
-use crate::{vec::Vec, Box};
-
 use crate::{
     curves::{
         models::{SWModelParameters, TEModelParameters},
@@ -7,22 +5,21 @@ use crate::{
         twisted_edwards_extended::{GroupAffine as TEAffine, GroupProjective as TEProjective},
         ProjectiveCurve,
     },
-    Fp2, Fp2Parameters, FpParameters, Field, PrimeField,
-    serialize::SerializationError,
+    Box, Field, Fp2, Fp2Parameters, FpParameters, PrimeField, Vec,
 };
 
-type Error = Box<SerializationError>;
+type Error = Box<dyn crate::Error>;
 
-/// Types that can be converted to a vector of `F` elements. Useful for specifying
-/// how public inputs to a constraint system should be represented inside
-/// that constraint system.
+/// Types that can be converted to a vector of `F` elements. Useful for
+/// specifying how public inputs to a constraint system should be represented
+/// inside that constraint system.
 pub trait ToConstraintField<F: Field> {
     fn to_field_elements(&self) -> Result<Vec<F>, Error>;
 }
 
 impl<F: PrimeField> ToConstraintField<F> for F {
     fn to_field_elements(&self) -> Result<Vec<F>, Error> {
-        Ok(crate::vec![*self])
+        Ok(vec![*self])
     }
 }
 
@@ -42,8 +39,7 @@ impl<ConstraintF: Field> ToConstraintField<ConstraintF> for () {
 }
 
 // Impl for Fp2<ConstraintF>
-impl<P: Fp2Parameters> ToConstraintField<P::Fp> for Fp2<P>
-{
+impl<P: Fp2Parameters> ToConstraintField<P::Fp> for Fp2<P> {
     #[inline]
     fn to_field_elements(&self) -> Result<Vec<P::Fp>, Error> {
         let mut c0 = self.c0.to_field_elements()?;
@@ -123,7 +119,8 @@ impl<ConstraintF: PrimeField> ToConstraintField<ConstraintF> for [u8] {
                 ConstraintF::read(chunk.as_slice())
             })
             .collect::<Result<Vec<_>, _>>()
-            .map_err(|e| Box::new(e.into()))?;
+            .map_err(crate::SerializationError::from)
+            .map_err(|e| Box::new(e))?;
         Ok(fes)
     }
 }

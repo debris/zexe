@@ -1,5 +1,5 @@
+use crate::io;
 use core::fmt;
-use crate::fake_io;
 
 /// This is an error that could occur during serialization
 #[derive(Debug)]
@@ -13,36 +13,54 @@ pub enum SerializationError {
     /// During serialization, extra info was of the wrong size.
     ExtraInfoWrongSize,
     /// During serialization, we countered an I/O error.
-    IoError(fake_io::Error),
+    IoError(io::Error),
 }
 
-impl From<fake_io::Error> for SerializationError {
-    fn from(e: fake_io::Error) -> SerializationError {
+#[cfg(feature = "std")]
+pub(crate) use std::error::Error;
+
+#[cfg(feature = "std")]
+impl Error for SerializationError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
+
+#[cfg(not(feature = "std"))]
+pub trait Error: fmt::Debug + fmt::Display {}
+
+#[cfg(not(feature = "std"))]
+impl<'a, E: Error + 'a> From<E> for crate::Box<dyn Error + 'a> {
+    fn from(err: E) -> crate::Box<dyn Error + 'a> {
+        crate::Box::new(err)
+    }
+}
+
+#[cfg(not(feature = "std"))]
+impl<T: Error> Error for crate::Box<T> {}
+
+#[cfg(not(feature = "std"))]
+impl Error for SerializationError {}
+
+impl From<io::Error> for SerializationError {
+    fn from(e: io::Error) -> SerializationError {
         SerializationError::IoError(e)
     }
 }
 
 impl fmt::Display for SerializationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        if let SerializationError::IoError(_) = self {
-            write!(f, "I/O error")
-        } else {
-            let description = match self {
-                SerializationError::BufferWrongSize => {
-                    "the output buffer is of the wrong size"
-                },
-                SerializationError::NotEnoughSpace => {
-                    "the last byte does not have enough space to encode the extra info bits"
-                },
-                SerializationError::InvalidData => {
-                    "the input buffer contained invalid data"
-                },
-                SerializationError::ExtraInfoWrongSize => {
-                    "extra info is of the wrong size"
-                },
-                SerializationError::IoError(_) => "encountered an I/O error",
-            };
-            write!(f, "{}", description)
+        match self {
+            SerializationError::BufferWrongSize => {
+                write!(f, "the output buffer is of the wrong size")
+            },
+            SerializationError::NotEnoughSpace => write!(
+                f,
+                "the last byte does not have enough space to encode the extra info bits"
+            ),
+            SerializationError::InvalidData => write!(f, "the input buffer contained invalid data"),
+            SerializationError::ExtraInfoWrongSize => write!(f, "extra info is of the wrong size"),
+            SerializationError::IoError(err) => write!(f, "I/O error: {:?}", err),
         }
     }
 }

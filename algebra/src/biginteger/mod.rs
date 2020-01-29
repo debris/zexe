@@ -1,12 +1,14 @@
-use crate::Vec;
 use crate::{
     bytes::{FromBytes, ToBytes},
     fields::BitIterator,
-    UniformRand,
+    io::{Read, Result as IoResult, Write},
+    UniformRand, Vec,
 };
-use rand::{Rng, distributions::{Distribution, Standard}};
-use crate::fake_io::{Read, Result as IoResult, Write};
 use core::fmt::{Debug, Display};
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
 
 #[macro_use]
 mod macros;

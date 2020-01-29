@@ -1,5 +1,4 @@
-use crate::Vec;
-use crate::{BigInteger, FpParameters, PrimeField, ProjectiveCurve};
+use crate::{BigInteger, FpParameters, PrimeField, ProjectiveCurve, Vec};
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
@@ -23,7 +22,7 @@ impl FixedBaseMSM {
         let outerc = (scalar_size + window - 1) / window;
         let last_in_window = 1 << (scalar_size - (outerc - 1) * window);
 
-        let mut multiples_of_g = crate::vec![crate::vec![T::zero(); in_window]; outerc];
+        let mut multiples_of_g = vec![vec![T::zero(); in_window]; outerc];
 
         let mut g_outer = g;
         for outer in 0..outerc {
@@ -57,7 +56,8 @@ impl FixedBaseMSM {
         for outer in 0..outerc {
             let mut inner = 0usize;
             for i in 0..window {
-                if outer * window + i < (<T::ScalarField as PrimeField>::Params::MODULUS_BITS as usize)
+                if outer * window + i
+                    < (<T::ScalarField as PrimeField>::Params::MODULUS_BITS as usize)
                     && scalar_val[outer * window + i]
                 {
                     inner |= 1 << i;
@@ -82,6 +82,8 @@ impl FixedBaseMSM {
         #[cfg(not(feature = "parallel"))]
         let v_iter = v.iter();
 
-        v_iter.map(|e| Self::windowed_mul::<T>(outerc, window, table, e)).collect::<Vec<_>>()
+        v_iter
+            .map(|e| Self::windowed_mul::<T>(outerc, window, table, e))
+            .collect::<Vec<_>>()
     }
 }

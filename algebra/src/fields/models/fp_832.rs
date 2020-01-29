@@ -2,17 +2,16 @@ use crate::{
     biginteger::{arithmetic as fa, BigInteger as _BigInteger, BigInteger832 as BigInteger},
     bytes::{FromBytes, ToBytes},
     fields::{Field, FpParameters, LegendreSymbol, PrimeField, SquareRootField},
+    io::{Read, Result as IoResult, Write},
 };
-use num_traits::{One, Zero};
 use core::{
     cmp::{Ord, Ordering, PartialOrd},
     fmt::{Display, Formatter, Result as FmtResult},
-    //io::{Read, Result as IoResult, Write},
     marker::PhantomData,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
     str::FromStr,
 };
-use crate::fake_io::{Read, Result as IoResult, Write};
+use num_traits::{One, Zero};
 
 pub trait Fp832Parameters: FpParameters<BigInt = BigInteger> {}
 
@@ -760,7 +759,6 @@ impl<P: Fp832Parameters> FromStr for Fp832<P> {
     /// Does not accept unnecessary leading zeroes or a blank string.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            println!("Is empty!");
             return Err(());
         }
 
@@ -791,7 +789,6 @@ impl<P: Fp832Parameters> FromStr for Fp832<P> {
                     )));
                 },
                 None => {
-                    println!("Not valid digit!");
                     return Err(());
                 },
             }

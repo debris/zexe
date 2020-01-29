@@ -1,17 +1,26 @@
-use crate::Vec;
-use rand::{Rng, distributions::{Standard, Distribution}};
-use crate::{UniformRand, CanonicalSerialize, CanonicalDeserialize};
-use num_traits::{One, Zero};
+use crate::{
+    io::{Read, Result as IoResult, Write},
+    CanonicalDeserialize, CanonicalSerialize, UniformRand, Vec,
+};
 use core::{
     fmt::{Display, Formatter, Result as FmtResult},
     marker::PhantomData,
     ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
-use crate::fake_io::{Result as IoResult, Write, Read};
+use num_traits::{One, Zero};
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
 
 use crate::{
     bytes::{FromBytes, ToBytes},
-    curves::{models::TEModelParameters as Parameters, models::MontgomeryModelParameters as MontgomeryParameters, AffineCurve, ProjectiveCurve},
+    curves::{
+        models::{
+            MontgomeryModelParameters as MontgomeryParameters, TEModelParameters as Parameters,
+        },
+        AffineCurve, ProjectiveCurve,
+    },
     fields::{BitIterator, Field, PrimeField, SquareRootField},
 };
 
@@ -28,8 +37,8 @@ pub mod tests;
     Hash(bound = "P: Parameters")
 )]
 pub struct GroupAffine<P: Parameters> {
-    pub x: P::BaseField,
-    pub y: P::BaseField,
+    pub x:   P::BaseField,
+    pub y:   P::BaseField,
     #[derivative(Debug = "ignore")]
     _params: PhantomData<P>,
 }
@@ -290,10 +299,10 @@ mod group_impl {
     Hash(bound = "P: Parameters")
 )]
 pub struct GroupProjective<P: Parameters> {
-    pub x: P::BaseField,
-    pub y: P::BaseField,
-    pub t: P::BaseField,
-    pub z: P::BaseField,
+    pub x:   P::BaseField,
+    pub y:   P::BaseField,
+    pub t:   P::BaseField,
+    pub z:   P::BaseField,
     #[derivative(Debug = "ignore")]
     _params: PhantomData<P>,
 }
@@ -640,16 +649,16 @@ impl<P: Parameters> From<GroupProjective<P>> for GroupAffine<P> {
 
 #[derive(Derivative)]
 #[derivative(
-Copy(bound = "P: MontgomeryParameters"),
-Clone(bound = "P: MontgomeryParameters"),
-PartialEq(bound = "P: MontgomeryParameters"),
-Eq(bound = "P: MontgomeryParameters"),
-Debug(bound = "P: MontgomeryParameters"),
-Hash(bound = "P: MontgomeryParameters")
+    Copy(bound = "P: MontgomeryParameters"),
+    Clone(bound = "P: MontgomeryParameters"),
+    PartialEq(bound = "P: MontgomeryParameters"),
+    Eq(bound = "P: MontgomeryParameters"),
+    Debug(bound = "P: MontgomeryParameters"),
+    Hash(bound = "P: MontgomeryParameters")
 )]
 pub struct MontgomeryGroupAffine<P: MontgomeryParameters> {
-    pub x: P::BaseField,
-    pub y: P::BaseField,
+    pub x:   P::BaseField,
+    pub y:   P::BaseField,
     #[derivative(Debug = "ignore")]
     _params: PhantomData<P>,
 }

@@ -1,4 +1,3 @@
-use num_traits::{One, Zero};
 use core::{
     cmp::{Ord, Ordering, PartialOrd},
     fmt::{Display, Formatter, Result as FmtResult},
@@ -6,12 +5,13 @@ use core::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
     str::FromStr,
 };
+use num_traits::{One, Zero};
 
-use crate::fake_io::{Read, Result as IoResult, Write};
 use crate::{
     biginteger::{arithmetic as fa, BigInteger as _BigInteger, BigInteger384 as BigInteger},
     bytes::{FromBytes, ToBytes},
     fields::{Field, FpParameters, LegendreSymbol, PrimeField, SquareRootField},
+    io::{Read, Result as IoResult, Write},
 };
 
 pub trait Fp384Parameters: FpParameters<BigInt = BigInteger> {}
@@ -361,7 +361,7 @@ impl<P: Fp384Parameters> PrimeField for Fp384<P> {
 
     #[inline]
     fn from_random_bytes(bytes: &[u8]) -> Option<Self> {
-        let mut result_bytes = crate::vec![0u8; (Self::zero().0).0.len() * 8];
+        let mut result_bytes = vec![0u8; (Self::zero().0).0.len() * 8];
         for (result_byte, in_byte) in result_bytes.iter_mut().zip(bytes.iter()) {
             *result_byte = *in_byte;
         }
@@ -461,7 +461,6 @@ impl<P: Fp384Parameters> FromStr for Fp384<P> {
     /// Does not accept unnecessary leading zeroes or a blank string.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            println!("Is empty!");
             return Err(());
         }
 
@@ -492,7 +491,6 @@ impl<P: Fp384Parameters> FromStr for Fp384<P> {
                     )));
                 },
                 None => {
-                    println!("Not valid digit!");
                     return Err(());
                 },
             }

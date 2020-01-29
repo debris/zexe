@@ -1,11 +1,15 @@
-use crate::{bytes::{FromBytes, ToBytes}, fields::{Field, PrimeField, SquareRootField}, groups::Group};
-use crate::UniformRand;
-use num_traits::Zero;
+use crate::{
+    bytes::{FromBytes, ToBytes},
+    fields::{Field, PrimeField, SquareRootField},
+    groups::Group,
+    UniformRand,
+};
 use core::{
     fmt::{Debug, Display},
     hash::Hash,
     ops::{Add, AddAssign, Neg, Sub, SubAssign},
 };
+use num_traits::Zero;
 
 pub mod bls12_377;
 pub mod bls12_381;
@@ -26,33 +30,21 @@ pub trait PairingEngine: Sized + 'static + Copy + Debug + Sync + Send {
     type Fr: PrimeField + SquareRootField + Into<<Self::Fr as PrimeField>::BigInt>;
 
     /// The projective representation of an element in G1.
-    type G1Projective: ProjectiveCurve<
-            BaseField = Self::Fq,
-            ScalarField = Self::Fr,
-            Affine = Self::G1Affine,
-        > + From<Self::G1Affine>;
+    type G1Projective: ProjectiveCurve<BaseField = Self::Fq, ScalarField = Self::Fr, Affine = Self::G1Affine>
+        + From<Self::G1Affine>;
 
     /// The affine representation of an element in G1.
-    type G1Affine: AffineCurve<
-            BaseField = Self::Fq,
-            ScalarField = Self::Fr,
-            Projective = Self::G1Projective,
-        > + PairingCurve<PairWith = Self::G2Affine, PairingResult = Self::Fqk>
+    type G1Affine: AffineCurve<BaseField = Self::Fq, ScalarField = Self::Fr, Projective = Self::G1Projective>
+        + PairingCurve<PairWith = Self::G2Affine, PairingResult = Self::Fqk>
         + From<Self::G1Projective>;
 
     /// The projective representation of an element in G2.
-    type G2Projective: ProjectiveCurve<
-            BaseField = Self::Fqe,
-            ScalarField = Self::Fr,
-            Affine = Self::G2Affine,
-        > + From<Self::G2Affine>;
+    type G2Projective: ProjectiveCurve<BaseField = Self::Fqe, ScalarField = Self::Fr, Affine = Self::G2Affine>
+        + From<Self::G2Affine>;
 
     /// The affine representation of an element in G2.
-    type G2Affine: AffineCurve<
-            BaseField = Self::Fqe,
-            ScalarField = Self::Fr,
-            Projective = Self::G2Projective,
-        > + PairingCurve<PairWith = Self::G1Affine, PairingResult = Self::Fqk>
+    type G2Affine: AffineCurve<BaseField = Self::Fqe, ScalarField = Self::Fr, Projective = Self::G2Projective>
+        + PairingCurve<PairWith = Self::G1Affine, PairingResult = Self::Fqk>
         + From<Self::G2Projective>;
 
     /// The base field that hosts G1.

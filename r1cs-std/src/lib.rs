@@ -35,6 +35,7 @@
 
 #[macro_use]
 extern crate algebra;
+
 #[macro_use]
 extern crate derivative;
 
@@ -71,6 +72,6 @@ pub trait Assignment<T> {
 
 impl<T> Assignment<T> for Option<T> {
     fn get(self) -> Result<T, r1cs_core::SynthesisError> {
-        self.ok_or_else(|| { r1cs_core::SynthesisError::AssignmentMissing })
+        self.ok_or_else(|| r1cs_core::SynthesisError::AssignmentMissing)
     }
 }

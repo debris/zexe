@@ -1,22 +1,21 @@
-use crate::Vec;
-use crate::{UniformRand, CanonicalSerialize, CanonicalDeserialize, SerializationError, buffer_bit_byte_size};
+use crate::{CanonicalDeserialize, CanonicalSerialize, SerializationError, UniformRand, Vec};
+use core::{
+    cmp::{Ord, Ordering, PartialOrd},
+    fmt,
+    marker::PhantomData,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+    str::FromStr,
+};
 use num_traits::{One, Zero};
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
-use core::{
-    cmp::{Ord, Ordering, PartialOrd},
-    marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
-    str::FromStr,
-    fmt,
-};
 
-use crate::fake_io::{Read, Result as IoResult, Write};
 use crate::{
     bytes::{FromBytes, ToBytes},
     fields::{Field, LegendreSymbol, PrimeField, SquareRootField},
+    io::{Read, Result as IoResult, Write},
 };
 
 pub trait Fp3Parameters: 'static + Send + Sync {
@@ -48,9 +47,9 @@ pub trait Fp3Parameters: 'static + Send + Sync {
     Eq(bound = "P: Fp3Parameters")
 )]
 pub struct Fp3<P: Fp3Parameters> {
-    pub c0: P::Fp,
-    pub c1: P::Fp,
-    pub c2: P::Fp,
+    pub c0:          P::Fp,
+    pub c1:          P::Fp,
+    pub c2:          P::Fp,
     #[derivative(Debug = "ignore")]
     #[doc(hidden)]
     pub _parameters: PhantomData<P>,
@@ -485,15 +484,12 @@ impl<P: Fp3Parameters> FromStr for Fp3<P> {
     fn from_str(mut s: &str) -> Result<Self, Self::Err> {
         s = s.trim();
         if s.is_empty() {
-            println!("is empty");
             return Err(());
         }
         if s.len() < 3 {
-            println!("len is less than 3");
             return Err(());
         }
         if !(s.starts_with('[') && s.ends_with(']')) {
-            println!("doesn't start and end with square brackets");
             return Err(());
         }
         let mut point = Vec::new();
@@ -504,7 +500,6 @@ impl<P: Fp3Parameters> FromStr for Fp3<P> {
             }
         }
         if point.len() != 3 {
-            println!("not enough points");
             return Err(());
         }
         let point = Fp3::new(point[0], point[1], point[2]);
@@ -519,29 +514,46 @@ impl<P: Fp3Parameters> fmt::Display for Fp3<P> {
 }
 
 impl<P: Fp3Parameters> CanonicalSerialize for Fp3<P> {
-    fn serialize(&self, extra_info: &[bool], output_buf: &mut [u8]) -> Result<(), SerializationError> {
-        let (_, fp_byte_size) = buffer_bit_byte_size(<P::Fp as PrimeField>::size_in_bits());
-        if output_buf.len() != 3*fp_byte_size {
+    fn serialize(
+        &self,
+        extra_info: &[bool],
+        output_buf: &mut [u8],
+    ) -> Result<(), SerializationError> {
+        let fp_byte_size = <P::Fp as CanonicalSerialize>::buffer_size();
+        if output_buf.len() != 3 * fp_byte_size {
             return Err(SerializationError::BufferWrongSize);
         }
         self.c0.serialize(&[], &mut output_buf[..fp_byte_size])?;
-        self.c1.serialize(&[], &mut output_buf[fp_byte_size..2*fp_byte_size])?;
-        self.c2.serialize(extra_info, &mut output_buf[2*fp_byte_size..3*fp_byte_size])?;
+        self.c1
+            .serialize(&[], &mut output_buf[fp_byte_size..2 * fp_byte_size])?;
+        self.c2.serialize(
+            extra_info,
+            &mut output_buf[2 * fp_byte_size..3 * fp_byte_size],
+        )?;
         Ok(())
+    }
+
+    fn buffer_size() -> usize {
+        3 * <P::Fp as CanonicalSerialize>::buffer_size()
     }
 }
 
 impl<P: Fp3Parameters> CanonicalDeserialize for Fp3<P> {
     fn deserialize(bytes: &[u8], extra_info_buf: &mut [bool]) -> Result<Self, SerializationError>
-        where Self: Sized {
-        let (_, fp_byte_size) = buffer_bit_byte_size(<P::Fp as PrimeField>::size_in_bits());
-        if bytes.len() != 3*fp_byte_size {
+    where
+        Self: Sized,
+    {
+        let fp_byte_size = <P::Fp as CanonicalSerialize>::buffer_size();
+        if bytes.len() != 3 * fp_byte_size {
             return Err(SerializationError::BufferWrongSize);
         }
         let mut dummy_mutable_slice = [false; 0];
         let c0 = P::Fp::deserialize(&bytes[..fp_byte_size], &mut dummy_mutable_slice)?;
-        let c1 = P::Fp::deserialize(&bytes[fp_byte_size..2*fp_byte_size], &mut dummy_mutable_slice)?;
-        let c2 = P::Fp::deserialize(&bytes[2*fp_byte_size..3*fp_byte_size], extra_info_buf)?;
+        let c1 = P::Fp::deserialize(
+            &bytes[fp_byte_size..2 * fp_byte_size],
+            &mut dummy_mutable_slice,
+        )?;
+        let c2 = P::Fp::deserialize(&bytes[2 * fp_byte_size..3 * fp_byte_size], extra_info_buf)?;
         Ok(Fp3::new(c0, c1, c2))
     }
 }

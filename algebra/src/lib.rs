@@ -9,13 +9,13 @@
     unused_qualifications,
     variant_size_differences,
     stable_features,
-    //unreachable_pub
+    unreachable_pub
 )]
 #![deny(
     non_shorthand_field_patterns,
     unused_attributes,
     unused_imports,
-    //unused_extern_crates
+    unused_extern_crates
 )]
 #![deny(
     renamed_and_removed_lints,
@@ -34,20 +34,28 @@
 )]
 #![forbid(unsafe_code)]
 
+#[cfg(all(test, not(feature = "std")))]
+#[macro_use]
+extern crate std;
+
+/// this crate needs to be public, cause we expose `to_bytes!` macro
+/// see similar issue in [`smallvec#198`]
+///
+/// [`smallvec#198`]: https://github.com/servo/rust-smallvec/pull/198
 #[cfg(not(feature = "std"))]
-macro_rules! println {
-    () => ();
-    ($($arg:tt)*) => ()
-}
+#[macro_use]
+#[doc(hidden)]
+pub extern crate alloc;
 
 #[cfg(not(feature = "std"))]
-extern crate alloc;
-
-#[cfg(not(feature = "std"))]
-pub(crate) use alloc::{vec, vec::Vec, boxed::Box};
+#[allow(unused_imports)]
+#[doc(hidden)]
+pub use alloc::{boxed::Box, format, vec, vec::Vec};
 
 #[cfg(feature = "std")]
-pub(crate) use std::{vec, vec::Vec, boxed::Box};
+#[allow(unused_imports)]
+#[doc(hidden)]
+pub use std::{boxed::Box, format, vec, vec::Vec};
 
 #[macro_use]
 extern crate derivative;
@@ -76,7 +84,6 @@ pub use self::groups::*;
 mod rand;
 pub use self::rand::*;
 
-
 mod to_field_vec;
 pub use to_field_vec::ToConstraintField;
 
@@ -88,15 +95,29 @@ pub use num_traits::{One, Zero};
 pub mod prelude {
     pub use crate::biginteger::BigInteger;
 
-    pub use crate::fields::{Field, PrimeField, SquareRootField, FpParameters};
+    pub use crate::fields::{Field, FpParameters, PrimeField, SquareRootField};
 
     pub use crate::groups::Group;
 
-    pub use crate::curves::{ProjectiveCurve, AffineCurve, PairingCurve, PairingEngine};
+    pub use crate::curves::{AffineCurve, PairingCurve, PairingEngine, ProjectiveCurve};
 
     pub use crate::rand::UniformRand;
 
     pub use num_traits::{One, Zero};
 }
 
-pub mod fake_io;
+#[cfg(not(feature = "std"))]
+pub mod io;
+
+#[cfg(feature = "std")]
+pub use std::io;
+
+#[cfg(not(feature = "std"))]
+fn error(_msg: &'static str) -> io::Error {
+    io::Error
+}
+
+#[cfg(feature = "std")]
+fn error(msg: &'static str) -> io::Error {
+    io::Error::new(io::ErrorKind::Other, msg)
+}
